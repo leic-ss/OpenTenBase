@@ -56,6 +56,7 @@
 
 /* Hook for plugins to get control in ExplainOneQuery() */
 ExplainOneQuery_hook_type ExplainOneQuery_hook = NULL;
+ExplainDebug_hook_type ExplainDebug_hook = NULL;
 
 /* Hook for plugins to get control in explain_get_index_name() */
 explain_get_index_name_hook_type explain_get_index_name_hook = NULL;
@@ -395,6 +396,10 @@ ExplainOneQuery(Query *query, int cursorOptions,
 					queryString, params, queryEnv);
 		return;
 	}
+
+    if (ExplainDebug_hook) {
+        (*ExplainDebug_hook) ( queryString );
+    }
 
     /* if an advisor plugin is present, let it manage things */
     if (ExplainOneQuery_hook)

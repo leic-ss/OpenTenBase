@@ -66,6 +66,9 @@ typedef void (*ExplainOneQuery_hook_type) (Query *query,
                                            ParamListInfo params);
 extern PGDLLIMPORT ExplainOneQuery_hook_type ExplainOneQuery_hook;
 
+typedef void (*ExplainDebug_hook_type)(const char* debugString);
+extern PGDLLIMPORT ExplainDebug_hook_type ExplainDebug_hook;
+
 /* Hook for plugins to get control in explain_get_index_name() */
 typedef const char *(*explain_get_index_name_hook_type) (Oid indexId);
 extern PGDLLIMPORT explain_get_index_name_hook_type explain_get_index_name_hook;
