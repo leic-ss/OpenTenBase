@@ -2065,7 +2065,9 @@ int pg_open_debug_logfile(const char* logfile)
 {
     if (pg_debug_log_fd > 0) return 1;
 
-    pg_debug_log_fd = open(logfile, O_RDWR | O_CREAT);
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+
+    pg_debug_log_fd = open(logfile, O_RDWR | O_CREAT, mode);
     if (pg_debug_log_fd < 0) return -1;
 
     return 0;
