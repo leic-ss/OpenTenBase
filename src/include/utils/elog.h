@@ -499,6 +499,13 @@ extern bool in_error_recursion_trouble(void);
 
 extern int pg_open_debug_logfile(const char* logfile);
 extern void pg_write_debug_log_file(const char* debugstr);
+extern void pgdebug_output_log_file(const char *file, int32_t line, const char *function, const char *fmt, ...);
+
+#define PGDEBUG_LOG_FILE_NAME(x) strrchr( (x),'/')?strrchr( (x) ,'/')+1:(x)
+
+// printf style log macro
+#define __PGDEBUG_OUTPUT__(...)        \
+    pgdebug_output_log_file(PGDEBUG_LOG_FILE_NAME(__FILE__), __LINE__, __FUNCTION__, __VA_ARGS__)
 
 #ifdef HAVE_SYSLOG
 extern void set_syslog_parameters(const char *ident, int facility);
