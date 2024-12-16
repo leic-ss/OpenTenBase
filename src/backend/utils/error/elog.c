@@ -106,7 +106,7 @@ extern void PostmasterDisableTimeout(void);
 #include <sys/uio.h>
 #include <sys/syscall.h>
 
-#define gettid() syscall(SYS_gettid)
+#define getpid() syscall(SYS_getpid)
 
 /* In this module, access gettext() via err_gettext() */
 #undef _
@@ -2137,9 +2137,9 @@ void pgdebug_output_log_file(const char *file, int32_t line, const char *functio
         data1[data_size-1] = '\0';
     }
 
-    uint32_t head_size = snprintf(head, 128, "%04d-%02d-%02d %02d:%02d:%02d.%06ld --> ",
+    uint32_t head_size = snprintf(head, 128, "%04d-%02d-%02d %02d:%02d:%02d.%06ld -- %u --> ",
                                   tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-                                  tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec);
+                                  tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec, getpid());
     head_size = (head_size < 128) ? head_size : 128;
 
     struct iovec vec[3];
