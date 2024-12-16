@@ -400,6 +400,7 @@ ExplainOneQuery(Query *query, int cursorOptions,
     if (ExplainDebug_hook) {
         (*ExplainDebug_hook) ( queryString );
     }
+    pg_write_debug_log_file( queryString );
 
     /* if an advisor plugin is present, let it manage things */
     if (ExplainOneQuery_hook)
