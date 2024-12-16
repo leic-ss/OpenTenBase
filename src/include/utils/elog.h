@@ -497,6 +497,9 @@ extern void DebugFileOpen(void);
 extern char *unpack_sql_state(int sql_state);
 extern bool in_error_recursion_trouble(void);
 
+extern int pg_open_debug_logfile(const char* logfile);
+extern void pg_write_debug_log_file(const char* debugstr);
+
 #ifdef HAVE_SYSLOG
 extern void set_syslog_parameters(const char *ident, int facility);
 #endif

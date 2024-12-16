@@ -96,6 +96,12 @@ extern void PostmasterEnableLogTimeout(void);
 extern void PostmasterDisableTimeout(void);
 #endif
 
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
 
 /* In this module, access gettext() via err_gettext() */
 #undef _
@@ -105,6 +111,8 @@ extern void PostmasterDisableTimeout(void);
 static void AtProcExit_MsgModule(int code, Datum arg);
 static bool pg_msgmodule_enable_disable(int32 pid, bool enable);
 #endif
+
+int pg_debug_log_fd = -1;
 
 /* Global variables */
 ErrorContextCallback *error_context_stack = NULL;
@@ -2053,6 +2061,22 @@ DebugFileOpen(void)
     }
 }
 
+int pg_open_debug_logfile(const char* logfile)
+{
+    if (pg_debug_log_fd > 0) return 1;
+
+    pg_debug_log_fd = open(logfile, O_RDWR | O_CREAT);
+    if (pg_debug_log_fd < 0) return -1;
+
+    return 0;
+}
+
+void pg_write_debug_log_file(const char* debugstr)
+{
+    if (pg_debug_log_fd < 0) return ;
+
+    write(pg_debug_log_fd, (void *)debugstr, strlen(debugstr));
+}
 
 #ifdef HAVE_SYSLOG
 
