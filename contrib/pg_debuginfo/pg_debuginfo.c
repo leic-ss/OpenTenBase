@@ -66,8 +66,8 @@ Datum pg_debuginfo_status(PG_FUNCTION_ARGS)
     Assert(fcinfo->nargs == 0);
 
     text* t = NULL;
-    int fd = pg_debuginfo_logfile_fd();
-    if (fd < 0) {
+    int logfd = pg_debuginfo_logfile_fd();
+    if (logfd < 0) {
         t = text_internal("pg debuginfo is disabled!");
         PG_RETURN_TEXT_P(t);
     } else {
@@ -84,6 +84,12 @@ Datum
 pg_debuginfo_output(PG_FUNCTION_ARGS)
 {
     Assert(fcinfo->nargs == 0);
+
+    int logfd = pg_debuginfo_logfile_fd();
+    if (logfd < 0) {
+        text* t = text_internal("debuginfo logfile is null!");
+        PG_RETURN_DATUM( PointerGetDatum(t) );
+    }
 
     const char* logfile = pg_debuginfo_logfile_name();
     if (strlen(logfile) == 0) {
@@ -122,12 +128,11 @@ pg_debuginfo_output(PG_FUNCTION_ARGS)
         char line[5120];
         fgets(line, sizeof(line), fp);
 
-        line[strlen(line)-1] = '\0';
         text *t = text_internal(line);
         SRF_RETURN_NEXT(funcctx, PointerGetDatum(t));
     } else {
         fclose(fp);
-        SRF_RETURN_DONE(funcctx);
+        // SRF_RETURN_DONE(funcctx);
     }
 }
 

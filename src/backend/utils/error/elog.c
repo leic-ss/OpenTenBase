@@ -2173,7 +2173,6 @@ int pg_debuginfo_logfile_close(void)
     }
 
     close(_pg_debuginfo_logfile_fd);
-
     _pg_debuginfo_logfile_fd = -1;
     memset(_pg_debuginfo_logfile_name, sizeof(_pg_debuginfo_logfile_name), 0);
     return 0;
