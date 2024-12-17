@@ -2091,10 +2091,10 @@ int pg_debuginfo_logfile_open(const char* logfile)
 
         snprintf(_pg_debuginfo_logfile_name, PG_DEBUGINFO_MAX_FILE_NAME_LEN, "./pgdebuginfo.%u.%04d%02d%02d%02d%02d%02d.log",
                 getpid(), tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-        _pg_debuginfo_logfile_fd = open(logfile, O_RDWR | O_CREAT, mode);
+        _pg_debuginfo_logfile_fd = open(_pg_debuginfo_logfile_name, O_RDWR | O_CREAT, mode);
     } else {
         snprintf(_pg_debuginfo_logfile_name, PG_DEBUGINFO_MAX_FILE_NAME_LEN, "%s", logfile);
-        _pg_debuginfo_logfile_fd = open(logfile, O_RDWR | O_CREAT, mode);
+        _pg_debuginfo_logfile_fd = open(_pg_debuginfo_logfile_name, O_RDWR | O_CREAT, mode);
     }
 
     if (_pg_debuginfo_logfile_fd < 0) {
