@@ -30,15 +30,6 @@ static inline text *text_internal(const char* str)
     return t;
 }
 
-PG_FUNCTION_INFO_V1(pg_debug_status);
-Datum pg_debug_status(PG_FUNCTION_ARGS)
-{
-    Assert(fcinfo->nargs == 0);
-    int32_t status = ExplainDebug_hook ? 1 : 0;
-
-    PG_RETURN_INT32(status);
-}
-
 PG_FUNCTION_INFO_V1(pg_debuginfo_enable);
 Datum pg_debuginfo_enable(PG_FUNCTION_ARGS)
 {
