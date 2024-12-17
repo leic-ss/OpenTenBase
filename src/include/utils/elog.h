@@ -497,6 +497,22 @@ extern void DebugFileOpen(void);
 extern char *unpack_sql_state(int sql_state);
 extern bool in_error_recursion_trouble(void);
 
+
+extern int pg_debuginfo_logfile_open(const char* logfile);
+extern void pg_debuginfo_logfile_write(const char *file, int32_t line, const char *function, const char *fmt, ...);
+extern int pg_debuginfo_logfile_close(void);
+extern int pg_debuginfo_logfile_fd(void);
+extern char* pg_debuginfo_logfile_name(void);
+
+#define PG_DEBUGINFO_MAX_FILE_NAME_LEN 1024
+
+#define PG_DEBUGINFO_LOG_FILE_NAME(x) strrchr( (x),'/')?strrchr( (x) ,'/')+1:(x)
+
+// printf style log macro
+#define __PG_DEBUGINFO_OUTPUT__(...)        \
+    pg_debuginfo_logfile_write(PG_DEBUGINFO_LOG_FILE_NAME(__FILE__), __LINE__, __FUNCTION__, __VA_ARGS__)
+
+
 #ifdef HAVE_SYSLOG
 extern void set_syslog_parameters(const char *ident, int facility);
 #endif

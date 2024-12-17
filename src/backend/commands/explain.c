@@ -396,6 +396,8 @@ ExplainOneQuery(Query *query, int cursorOptions,
 		return;
 	}
 
+    __PG_DEBUGINFO_OUTPUT__( "%s", queryString );
+
     /* if an advisor plugin is present, let it manage things */
     if (ExplainOneQuery_hook)
         (*ExplainOneQuery_hook) (query, cursorOptions, into, es,

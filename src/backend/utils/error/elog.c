@@ -96,6 +96,17 @@ extern void PostmasterEnableLogTimeout(void);
 extern void PostmasterDisableTimeout(void);
 #endif
 
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+#include <sys/uio.h>
+#include <sys/syscall.h>
+
+#define getpid() syscall(SYS_getpid)
 
 /* In this module, access gettext() via err_gettext() */
 #undef _
@@ -105,6 +116,20 @@ extern void PostmasterDisableTimeout(void);
 static void AtProcExit_MsgModule(int code, Datum arg);
 static bool pg_msgmodule_enable_disable(int32 pid, bool enable);
 #endif
+
+static int _pg_debuginfo_logfile_fd = -1;
+static char _pg_debuginfo_logfile_name[PG_DEBUGINFO_MAX_FILE_NAME_LEN];
+
+static uint32_t HDR_SIZE = 128;
+static uint32_t MSG_SIZE = 4*1024;
+
+static char NEWLINE[1] = {'\n'};
+
+#define PGDEBUG_LOG_FILE_NAME(x) strrchr( (x),'/')?strrchr( (x) ,'/')+1:(x)
+
+// printf style log macro
+#define _PGDEBUG_OUTPUT_(...)        \
+    pgdebug_output_log_file(PGDEBUG_LOG_FILE_NAME(__FILE__), __LINE__, __FUNCTION__, __VA_ARGS__)
 
 /* Global variables */
 ErrorContextCallback *error_context_stack = NULL;
@@ -2051,6 +2076,117 @@ DebugFileOpen(void)
                          errmsg("could not reopen file \"%s\" as stdout: %m",
                                 OutputFileName)));
     }
+}
+
+int pg_debuginfo_logfile_open(const char* logfile)
+{
+    if (_pg_debuginfo_logfile_fd > 0) return 1;
+
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+    if (!logfile) {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        time_t curtime = tv.tv_sec;
+        struct tm* tm = localtime((const time_t*)&tv.tv_sec);
+
+        snprintf(_pg_debuginfo_logfile_name, PG_DEBUGINFO_MAX_FILE_NAME_LEN, "/tmp/pgdebuginfo.%u.%04d%02d%02d%02d%02d%02d.log",
+                getpid(), tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+        _pg_debuginfo_logfile_fd = open(logfile, O_RDWR | O_CREAT, mode);
+    } else {
+        snprintf(_pg_debuginfo_logfile_name, PG_DEBUGINFO_MAX_FILE_NAME_LEN, "%s", logfile);
+        _pg_debuginfo_logfile_fd = open(logfile, O_RDWR | O_CREAT, mode);
+    }
+
+    if (_pg_debuginfo_logfile_fd < 0) {
+        memset(_pg_debuginfo_logfile_name, sizeof(_pg_debuginfo_logfile_name), 0);
+        return -1;
+    }
+
+    return 0;
+}
+
+void pg_debuginfo_logfile_write(const char *file, int32_t line, const char *function, const char *fmt, ...)
+{
+    if (_pg_debuginfo_logfile_fd < 0) return ;
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    time_t curtime = tv.tv_sec;
+    struct tm* tm = localtime((const time_t*)&tv.tv_sec);
+
+    char head[HDR_SIZE];
+    memset(head, HDR_SIZE, 0);
+    char data1[MSG_SIZE];
+    memset(data1, MSG_SIZE, 0);
+
+    uint32_t avail_len = MSG_SIZE;
+    va_list args;
+    va_start(args, fmt);
+    uint32_t data_size = vsnprintf(data1, MSG_SIZE, fmt, args);
+    data_size = (data_size < MSG_SIZE) ? data_size : MSG_SIZE;
+    va_end(args);
+    avail_len = MSG_SIZE - data_size;
+
+    uint32_t last_slash = 0;
+    for (uint32_t ii=0; file && file[ii] != 0; ++ii) {
+        if (file[ii] == '/' || file[ii] == '\\') last_slash = ii;
+    }
+
+    if (file && line && avail_len) {
+        uint32_t cur_len = snprintf( data1 + data_size, avail_len, "\t[%s:%d, %s()]",
+                                     file + ((last_slash)?(last_slash+1):0),
+                                     line, function );
+        cur_len = (cur_len < avail_len) ? cur_len : avail_len;
+        data_size += cur_len;
+    }
+
+    if (avail_len == 0) {
+        // remove trailing '\n'
+        while (data1[data_size-1] == '\n') data_size --;
+        data1[data_size-1] = '\0';
+    }
+
+    uint32_t head_size = snprintf(head, 128, "%04d-%02d-%02d %02d:%02d:%02d.%06ld -- %u --> ",
+                                  tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+                                  tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec, getpid());
+    head_size = (head_size < 128) ? head_size : 128;
+
+    struct iovec vec[3];
+    vec[0].iov_base = head;
+    vec[0].iov_len = head_size;
+    vec[1].iov_base = data1;
+    vec[1].iov_len = data_size;
+    vec[2].iov_base = NEWLINE;
+    vec[2].iov_len = sizeof(NEWLINE);
+    if (data_size > 0) {
+      writev(_pg_debuginfo_logfile_fd, vec, 3);
+    }
+
+    return ;
+}
+
+int pg_debuginfo_logfile_close(void)
+{
+    if (_pg_debuginfo_logfile_fd < 0) {
+        memset(_pg_debuginfo_logfile_name, sizeof(_pg_debuginfo_logfile_name), 0);
+        return -1;
+    }
+
+    close(_pg_debuginfo_logfile_fd);
+
+    _pg_debuginfo_logfile_fd = -1;
+    memset(_pg_debuginfo_logfile_name, sizeof(_pg_debuginfo_logfile_name), 0);
+    return 0;
+}
+
+int pg_debuginfo_logfile_fd(void)
+{
+    return _pg_debuginfo_logfile_fd;
+}
+
+char* pg_debuginfo_logfile_name(void)
+{
+    return _pg_debuginfo_logfile_name;
 }
 
 
