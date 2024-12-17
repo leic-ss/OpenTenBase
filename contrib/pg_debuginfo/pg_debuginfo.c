@@ -33,10 +33,18 @@ static inline text *text_internal(const char* str)
 PG_FUNCTION_INFO_V1(pg_debuginfo_enable);
 Datum pg_debuginfo_enable(PG_FUNCTION_ARGS)
 {
-    Assert(fcinfo->nargs == 0);
+    Assert(fcinfo->nargs == 0 || fcinfo->nargs == 1);
 
     text* t = NULL;
-    int ret = pg_debuginfo_logfile_open(NULL);
+    int ret = 0;
+
+    if (fcinfo->nargs == 0) {
+        ret = pg_debuginfo_logfile_open(NULL);
+    } else if (fcinfo->nargs == 1) {
+        const char* logfile = PG_GETARG_CSTRING(0);
+        ret = pg_debuginfo_logfile_open(logfile);
+    }
+
     if (ret < 0) {
         t = text_internal("enable failed! logfile open failed.");
         PG_RETURN_TEXT_P(t);

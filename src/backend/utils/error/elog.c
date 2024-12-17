@@ -2089,7 +2089,7 @@ int pg_debuginfo_logfile_open(const char* logfile)
         time_t curtime = tv.tv_sec;
         struct tm* tm = localtime((const time_t*)&tv.tv_sec);
 
-        snprintf(_pg_debuginfo_logfile_name, PG_DEBUGINFO_MAX_FILE_NAME_LEN, "~/pgdebuginfo.%u.%04d%02d%02d%02d%02d%02d.log",
+        snprintf(_pg_debuginfo_logfile_name, PG_DEBUGINFO_MAX_FILE_NAME_LEN, "./pgdebuginfo.%u.%04d%02d%02d%02d%02d%02d.log",
                 getpid(), tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
         _pg_debuginfo_logfile_fd = open(logfile, O_RDWR | O_CREAT, mode);
     } else {
