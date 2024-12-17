@@ -71,6 +71,25 @@ Datum pg_debuginfo_status(PG_FUNCTION_ARGS)
     PG_RETURN_TEXT_P(t);
 }
 
+PG_FUNCTION_INFO_V1(pg_debuginfo_output);
+Datum pg_debuginfo_output(PG_FUNCTION_ARGS)
+{
+    Assert(fcinfo->nargs == 0);
+
+    text* t = NULL;
+    int fd = pg_debuginfo_logfile_fd();
+    if (fd < 0) {
+        t = text_internal("pg debuginfo is disabled!");
+        PG_RETURN_TEXT_P(t);
+    } else {
+        t = text_internal("pg debuginfo is enabled!");
+        PG_RETURN_TEXT_P(t);
+    }
+
+    t = text_internal("exception!");
+    PG_RETURN_TEXT_P(t);
+}
+
 PG_FUNCTION_INFO_V1(pg_debuginfo_disable);
 Datum pg_debuginfo_disable(PG_FUNCTION_ARGS)
 {
