@@ -84,18 +84,51 @@ Datum pg_debuginfo_output(PG_FUNCTION_ARGS)
 {
     Assert(fcinfo->nargs == 0);
 
-    text* t = NULL;
-    int fd = pg_debuginfo_logfile_fd();
-    if (fd < 0) {
-        t = text_internal("pg debuginfo is disabled!");
-        PG_RETURN_TEXT_P(t);
-    } else {
-        t = text_internal("pg debuginfo is enabled!");
+    const char* logfile = pg_debuginfo_logfile_name();
+    if (strlen(logfile) == 0) {
+        text* t = text_internal("debuginfo logfile is null!");
         PG_RETURN_TEXT_P(t);
     }
 
-    t = text_internal("exception!");
-    PG_RETURN_TEXT_P(t);
+    FuncCallContext     *funcctx;
+    /* stuff done only on the first call of the function */
+    if (SRF_IS_FIRSTCALL())
+    {
+        MemoryContext   oldcontext;
+
+        /* create a function context for cross-call persistence */
+        funcctx = SRF_FIRSTCALL_INIT();
+
+        /* switch to memory context appropriate for multiple function calls */
+        oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
+
+        FILE *fp_ = fopen(logfile, "r");
+        /* total number of tuples to be returned */
+        funcctx->user_fctx = (void*)fp_;
+
+        MemoryContextSwitchTo(oldcontext);
+    }
+
+    /* stuff done on every call of the function */
+    funcctx = SRF_PERCALL_SETUP();
+    FILE* fp = (FILE*)funcctx->user_fctx;
+    if (!fp) {
+        text* t = text_internal("open debuginfo logfile failed!");
+        PG_RETURN_TEXT_P(t);
+    }
+
+    if ( !feof(fp) ) {
+        char line[5120];
+        memset(line, sizeof(line), 0);
+
+        fgets(line, sizeof(line), fp);
+
+        text *t = text_internal(line);
+        SRF_RETURN_NEXT(funcctx, PointerGetDatum(t));
+    } else {
+        fclose(fp);
+        SRF_RETURN_DONE(funcctx);
+    }
 }
 
 PG_FUNCTION_INFO_V1(pg_debuginfo_disable);
