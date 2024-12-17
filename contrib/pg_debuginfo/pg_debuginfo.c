@@ -88,7 +88,7 @@ pg_debuginfo_output(PG_FUNCTION_ARGS)
     const char* logfile = pg_debuginfo_logfile_name();
     if (strlen(logfile) == 0) {
         text* t = text_internal("debuginfo logfile is null!");
-        PG_RETURN_TEXT_P(t);
+        PG_RETURN_DATUM( PointerGetDatum(t) );
     }
 
     FuncCallContext     *funcctx;
@@ -115,15 +115,14 @@ pg_debuginfo_output(PG_FUNCTION_ARGS)
     FILE* fp = (FILE*)funcctx->user_fctx;
     if (!fp) {
         text* t = text_internal("open debuginfo logfile failed!");
-        PG_RETURN_TEXT_P(t);
+        PG_RETURN_DATUM(PointerGetDatum(t));
     }
 
     if ( !feof(fp) ) {
         char line[5120];
-        memset(line, sizeof(line), 0);
-
         fgets(line, sizeof(line), fp);
 
+        line[strlen(line)-1] = '\0';
         text *t = text_internal(line);
         SRF_RETURN_NEXT(funcctx, PointerGetDatum(t));
     } else {
