@@ -36,7 +36,7 @@ Datum pg_debuginfo_enable(PG_FUNCTION_ARGS)
     Assert(fcinfo->nargs == 0);
 
     text* t = NULL;
-    int ret = pg_debuginfo_file_open(NULL);
+    int ret = pg_debuginfo_logfile_open(NULL);
     if (ret < 0) {
         t = text_internal("enable failed! logfile open failed.");
         PG_RETURN_TEXT_P(t);
