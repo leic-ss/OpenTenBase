@@ -8,6 +8,11 @@ RETURNS text
 AS 'MODULE_PATHNAME', 'pg_debuginfo_enable'
 LANGUAGE C STRICT;
 
+CREATE FUNCTION pg_debuginfo_enable(cstring)
+RETURNS text
+AS 'MODULE_PATHNAME', 'pg_debuginfo_enable'
+LANGUAGE C STRICT;
+
 CREATE FUNCTION pg_debuginfo_status()
 RETURNS text
 AS 'MODULE_PATHNAME', 'pg_debuginfo_status'
