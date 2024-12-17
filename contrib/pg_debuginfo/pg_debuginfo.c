@@ -80,7 +80,8 @@ Datum pg_debuginfo_status(PG_FUNCTION_ARGS)
 }
 
 PG_FUNCTION_INFO_V1(pg_debuginfo_output);
-Datum pg_debuginfo_output(PG_FUNCTION_ARGS)
+Datum
+pg_debuginfo_output(PG_FUNCTION_ARGS)
 {
     Assert(fcinfo->nargs == 0);
 

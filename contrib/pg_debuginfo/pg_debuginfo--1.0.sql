@@ -19,7 +19,7 @@ AS 'MODULE_PATHNAME', 'pg_debuginfo_status'
 LANGUAGE C STRICT;
 
 CREATE FUNCTION pg_debuginfo_output()
-RETURNS text
+RETURNS SETOF text
 AS 'MODULE_PATHNAME', 'pg_debuginfo_output'
 LANGUAGE C STRICT;
 
