@@ -124,15 +124,13 @@ pg_debuginfo_output(PG_FUNCTION_ARGS)
         PG_RETURN_DATUM(PointerGetDatum(t));
     }
 
-    if ( !feof(fp) ) {
-        char line[5120];
-        fgets(line, sizeof(line), fp);
-
+    char line[5120];
+    if ( fgets(line, sizeof(line), fp) ) {
         text *t = text_internal(line);
         SRF_RETURN_NEXT(funcctx, PointerGetDatum(t));
     } else {
         fclose(fp);
-        // SRF_RETURN_DONE(funcctx);
+        SRF_RETURN_DONE(funcctx);
     }
 }
 
