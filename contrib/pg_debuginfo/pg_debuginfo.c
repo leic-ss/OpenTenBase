@@ -128,7 +128,7 @@ pg_debuginfo_output(PG_FUNCTION_ARGS)
     if ( fgets(line, sizeof(line), fp) ) {
         int size = strlen(line);
         while (line[size-1] == '\n') size --;
-        line[size-1] = '\0';
+        line[size] = '\0';
 
         text *t = text_internal(line);
         SRF_RETURN_NEXT(funcctx, PointerGetDatum(t));

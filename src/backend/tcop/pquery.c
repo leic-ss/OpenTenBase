@@ -1291,6 +1291,8 @@ PortalRun(Portal portal, long count, bool isTopLevel, bool run_once,
 
     TRACE_POSTGRESQL_QUERY_EXECUTE_START();
 
+    __PG_DEBUGINFO_OUTPUT__("query execute start!");
+
     /* Initialize completion tag to empty string */
     if (completionTag)
         completionTag[0] = '\0';
@@ -1636,6 +1638,7 @@ PortalRun(Portal portal, long count, bool isTopLevel, bool run_once,
         ShowUsage("EXECUTOR STATISTICS");
 
     TRACE_POSTGRESQL_QUERY_EXECUTE_DONE();
+    __PG_DEBUGINFO_OUTPUT__("query execute done!");
 
     return result;
 }
@@ -2090,6 +2093,7 @@ PortalRunMulti(Portal portal,
              * process a plannable query.
              */
             TRACE_POSTGRESQL_QUERY_EXECUTE_START();
+            __PG_DEBUGINFO_OUTPUT__("query execute start!");
 
             if (log_executor_stats)
                 ResetUsage();
@@ -2172,6 +2176,7 @@ PortalRunMulti(Portal portal,
                 ShowUsage("EXECUTOR STATISTICS");
 
             TRACE_POSTGRESQL_QUERY_EXECUTE_DONE();
+            __PG_DEBUGINFO_OUTPUT__("query execute done!");
         }
         else
         {

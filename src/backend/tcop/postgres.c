@@ -833,6 +833,8 @@ pg_parse_query(const char *query_string)
 
     TRACE_POSTGRESQL_QUERY_PARSE_START(query_string);
 
+    __PG_DEBUGINFO_OUTPUT__("parse start! sql[%s]", query_string);
+
     if (log_parser_stats)
         ResetUsage();
 
@@ -856,6 +858,8 @@ pg_parse_query(const char *query_string)
 
     TRACE_POSTGRESQL_QUERY_PARSE_DONE(query_string);
 
+    __PG_DEBUGINFO_OUTPUT__("parse done! sql[%s]", query_string);
+
     return raw_parsetree_list;
 }
 
@@ -877,6 +881,7 @@ pg_analyze_and_rewrite(RawStmt *parsetree, const char *query_string,
     List       *querytree_list;
 
     TRACE_POSTGRESQL_QUERY_REWRITE_START(query_string);
+    __PG_DEBUGINFO_OUTPUT__("rewrite start! sql[%s]", query_string);
 
     /*
      * (1) Perform parse analysis.
@@ -928,6 +933,7 @@ pg_analyze_and_rewrite(RawStmt *parsetree, const char *query_string,
 	querytree_list = pg_rewrite_query(query);
 
     TRACE_POSTGRESQL_QUERY_REWRITE_DONE(query_string);
+    __PG_DEBUGINFO_OUTPUT__("rewrite done! sql[%s]", query_string);
 
     return querytree_list;
 }
@@ -951,6 +957,8 @@ pg_analyze_and_rewrite_params(RawStmt *parsetree,
     Assert(query_string != NULL);    /* required as of 8.4 */
 
     TRACE_POSTGRESQL_QUERY_REWRITE_START(query_string);
+
+    __PG_DEBUGINFO_OUTPUT__("rewrite start! sql[%s]", query_string);
 
     /*
      * (1) Perform parse analysis.
@@ -1011,6 +1019,7 @@ pg_analyze_and_rewrite_params(RawStmt *parsetree,
 	querytree_list = pg_rewrite_query(query);
 
     TRACE_POSTGRESQL_QUERY_REWRITE_DONE(query_string);
+    __PG_DEBUGINFO_OUTPUT__("rewrite done! sql[%s]", query_string);
 
     return querytree_list;
 }
@@ -1087,6 +1096,8 @@ pg_plan_query(Query *querytree, int cursorOptions, ParamListInfo boundParams)
 
     TRACE_POSTGRESQL_QUERY_PLAN_START();
 
+    __PG_DEBUGINFO_OUTPUT__("query plan start!");
+
     if (log_planner_stats)
         ResetUsage();
 
@@ -1127,6 +1138,7 @@ pg_plan_query(Query *querytree, int cursorOptions, ParamListInfo boundParams)
         elog_node_display(LOG, "plan", plan, Debug_pretty_print);
 
     TRACE_POSTGRESQL_QUERY_PLAN_DONE();
+    __PG_DEBUGINFO_OUTPUT__("query plan done!");
 
     return plan;
 }
@@ -1240,6 +1252,7 @@ exec_simple_query(const char *query_string)
 
 
     TRACE_POSTGRESQL_QUERY_START(query_string);
+    __PG_DEBUGINFO_OUTPUT__("query start! sql[%s]", query_string);
 
     /*
      * We use save_log_statement_stats so ShowUsage doesn't report incorrect
@@ -1713,6 +1726,7 @@ exec_simple_query(const char *query_string)
         ShowUsage("QUERY STATISTICS");
 
     TRACE_POSTGRESQL_QUERY_DONE(query_string);
+    __PG_DEBUGINFO_OUTPUT__("query done! sql[%s]", query_string);
 
     debug_query_string = NULL;
 }
