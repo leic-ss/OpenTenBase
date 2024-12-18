@@ -11,7 +11,21 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <sys/socket.h>
+#include <sys/poll.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <time.h>
+#include <net/if.h>
+#include <linux/sockios.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 PG_MODULE_MAGIC;
+
+static char local_ip_str[1024];
 
 static inline text *text_internal(const char* str)
 {
@@ -28,6 +42,33 @@ static inline text *text_internal(const char* str)
     }
 
     return t;
+}
+
+static char* local_ip()
+{
+    uint32_t ip;
+    int32_t fd, intrface;
+    struct ifreq buf[32];
+    struct ifconf ifc;
+    ip = -1;
+    if ((fd = socket (AF_INET, SOCK_DGRAM, 0)) >= 0) {
+        ifc.ifc_len = sizeof buf;
+        ifc.ifc_buf = (caddr_t) buf;
+        if (!ioctl (fd, SIOCGIFCONF, (char *) &ifc)) {
+            intrface = ifc.ifc_len / sizeof (struct ifreq); 
+            while (intrface-- > 0) {
+                if (!(ioctl (fd, SIOCGIFADDR, (char *) &buf[intrface]))) {
+                    ip = inet_addr( inet_ntoa( ((struct sockaddr_in*)(&buf[intrface].ifr_addr))->sin_addr) );
+                    break;
+                }
+            }
+        }
+        close(fd);
+    }
+
+    unsigned char *bytes = (unsigned char *) &ip;
+    snprintf(local_ip_str, sizeof(local_ip_str), "%02d.%02d.%02d.%02d", bytes[0], bytes[1], bytes[2], bytes[3]);
+    return local_ip_str;
 }
 
 PG_FUNCTION_INFO_V1(pg_debuginfo_enable);
@@ -71,7 +112,13 @@ Datum pg_debuginfo_status(PG_FUNCTION_ARGS)
         t = text_internal("pg debuginfo is disabled!");
         PG_RETURN_TEXT_P(t);
     } else {
-        t = text_internal("pg debuginfo is enabled!");
+        char  resolved_path[4096] = {0};
+        realpath(pg_debuginfo_logfile_name(), resolved_path);
+
+        char buff[5120] = {0};
+        snprintf(buff, sizeof(buff), "pg debuginfo is enabled! host[%s] logfile[%s]", local_ip(), resolved_path);
+
+        t = text_internal(buff);
         PG_RETURN_TEXT_P(t);
     }
 
