@@ -171,16 +171,22 @@ pg_debuginfo_output(PG_FUNCTION_ARGS)
         PG_RETURN_DATUM(PointerGetDatum(t));
     }
 
-    char line[5120];
-    if ( fgets(line, sizeof(line), fp) ) {
-        int size = strlen(line);
-        while (line[size-1] == '\n') size --;
-        line[size] = '\0';
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    if ( (read = getline(&line, &len, fp)) != -1 ) {
+         if (line[read - 1] == '\n') {
+            line[read - 1] = '\0';
+        }
 
         text *t = text_internal(line);
+
+        if (line) free(line);
         SRF_RETURN_NEXT(funcctx, PointerGetDatum(t));
     } else {
         fclose(fp);
+        if (line) free(line);
         SRF_RETURN_DONE(funcctx);
     }
 }
