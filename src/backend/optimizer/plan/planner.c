@@ -1872,6 +1872,8 @@ grouping_planner(PlannerInfo *root, bool inheritance_update,
     RelOptInfo *final_rel;
     ListCell   *lc;
 
+    __PG_DEBUGINFO_OUTPUT__("grouping planner: %s", format_node_dump(nodeToString(parse)));
+
     /* Tweak caller-supplied tuple_fraction if have LIMIT/OFFSET */
     if (parse->limitCount || parse->limitOffset)
     {

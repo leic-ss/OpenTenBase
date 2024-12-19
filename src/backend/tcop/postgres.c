@@ -1076,6 +1076,8 @@ pg_rewrite_query(Query *query)
         elog_node_display(LOG, "rewritten parse tree", querytree_list,
                           Debug_pretty_print);
 
+    __PG_DEBUGINFO_OUTPUT__("pg rewrite query: %s", format_node_dump(nodeToString(querytree_list)));
+
     return querytree_list;
 }
 
@@ -1138,6 +1140,8 @@ pg_plan_query(Query *querytree, int cursorOptions, ParamListInfo boundParams)
      */
     if (Debug_print_plan)
         elog_node_display(LOG, "plan", plan, Debug_pretty_print);
+
+    __PG_DEBUGINFO_OUTPUT__("pg plan query: %s", format_node_dump(nodeToString(plan)));
 
     TRACE_POSTGRESQL_QUERY_PLAN_DONE();
     __PG_DEBUGINFO_OUTPUT__("query plan done!");
