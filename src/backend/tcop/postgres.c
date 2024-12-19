@@ -858,7 +858,6 @@ pg_parse_query(const char *query_string)
 
     TRACE_POSTGRESQL_QUERY_PARSE_DONE(query_string);
 
-    __PG_DEBUGINFO_OUTPUT__( "raw_parsetree_list: %s", format_node_dump(nodeToString(raw_parsetree_list)) );
     __PG_DEBUGINFO_OUTPUT__( "end parse sql[%s] type[%d] length[%d]", query_string, raw_parsetree_list->type, raw_parsetree_list->length );
 
     return raw_parsetree_list;
@@ -892,6 +891,8 @@ pg_analyze_and_rewrite(RawStmt *parsetree, const char *query_string,
 
     query = parse_analyze(parsetree, query_string, paramTypes, numParams,
                           queryEnv);
+
+    __PG_DEBUGINFO_OUTPUT__( "parse_analyze: %s", format_node_dump(nodeToString(query)) );
 
     if (log_parser_stats)
         ShowUsage("PARSE ANALYSIS STATISTICS");
@@ -1251,7 +1252,6 @@ exec_simple_query(const char *query_string)
      */
     debug_query_string = query_string;
 
-
     TRACE_POSTGRESQL_QUERY_START(query_string);
     __PG_DEBUGINFO_OUTPUT__("      ******** SQL START ********   ");
     __PG_DEBUGINFO_OUTPUT__("start query sql[%s]", query_string);
@@ -1347,8 +1347,6 @@ exec_simple_query(const char *query_string)
         was_logged = true;
     }
 
-    __PG_DEBUGINFO_OUTPUT__( "parsetree_list: %s", format_node_dump(nodeToString(parsetree_list)) );
-
     /*
      * Switch back to transaction context to enter the loop.
      */
@@ -1398,8 +1396,6 @@ exec_simple_query(const char *query_string)
          * destination.
          */
         commandTag = CreateCommandTag(parsetree->stmt);
-
-        __PG_DEBUGINFO_OUTPUT__( "commandTag: %s parsetree_list: %s", commandTag, format_node_dump(nodeToString(parsetree->stmt)) );
 
 #ifdef __AUDIT_FGA__
         g_commandTag = commandTag;
