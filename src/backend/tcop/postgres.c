@@ -833,7 +833,7 @@ pg_parse_query(const char *query_string)
 
     TRACE_POSTGRESQL_QUERY_PARSE_START(query_string);
 
-    __PG_DEBUGINFO_OUTPUT__("parse start! sql[%s]", query_string);
+    __PG_DEBUGINFO_OUTPUT__("start parse sql[%s]", query_string);
 
     if (log_parser_stats)
         ResetUsage();
@@ -858,7 +858,7 @@ pg_parse_query(const char *query_string)
 
     TRACE_POSTGRESQL_QUERY_PARSE_DONE(query_string);
 
-    __PG_DEBUGINFO_OUTPUT__("parse done! sql[%s]", query_string);
+    __PG_DEBUGINFO_OUTPUT__("end parse sql[%s] type[%d] length[%d]", query_string, raw_parsetree_list->type, raw_parsetree_list->length);
 
     return raw_parsetree_list;
 }
@@ -881,7 +881,7 @@ pg_analyze_and_rewrite(RawStmt *parsetree, const char *query_string,
     List       *querytree_list;
 
     TRACE_POSTGRESQL_QUERY_REWRITE_START(query_string);
-    __PG_DEBUGINFO_OUTPUT__("rewrite start! sql[%s]", query_string);
+    __PG_DEBUGINFO_OUTPUT__("start rewrite sql[%s]", query_string);
 
     /*
      * (1) Perform parse analysis.
@@ -1252,7 +1252,8 @@ exec_simple_query(const char *query_string)
 
 
     TRACE_POSTGRESQL_QUERY_START(query_string);
-    __PG_DEBUGINFO_OUTPUT__("query start! sql[%s]", query_string);
+    __PG_DEBUGINFO_OUTPUT__("      ******** SQL EXEC START ********   ");
+    __PG_DEBUGINFO_OUTPUT__("start query sql[%s]", query_string);
 
     /*
      * We use save_log_statement_stats so ShowUsage doesn't report incorrect
@@ -1394,6 +1395,8 @@ exec_simple_query(const char *query_string)
          * destination.
          */
         commandTag = CreateCommandTag(parsetree->stmt);
+
+        __PG_DEBUGINFO_OUTPUT__( "create commandTag: %s", commandTag );
 
 #ifdef __AUDIT_FGA__
         g_commandTag = commandTag;
@@ -1727,6 +1730,7 @@ exec_simple_query(const char *query_string)
 
     TRACE_POSTGRESQL_QUERY_DONE(query_string);
     __PG_DEBUGINFO_OUTPUT__("query done! sql[%s]", query_string);
+    __PG_DEBUGINFO_OUTPUT__("      ******** SQL EXEC END ********   ");
 
     debug_query_string = NULL;
 }
