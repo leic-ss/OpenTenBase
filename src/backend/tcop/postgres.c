@@ -1420,6 +1420,8 @@ exec_simple_query(const char *query_string)
 
         set_ps_display(commandTag, false);
 
+        __PG_DEBUGINFO_OUTPUT__("process commandTag[%s]", commandTag);
+
         BeginCommand(commandTag, dest);
 
         /*

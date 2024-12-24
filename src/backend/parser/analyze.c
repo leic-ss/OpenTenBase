@@ -161,6 +161,8 @@ parse_analyze(RawStmt *parseTree, const char *sourceText,
 
     query = transformTopLevelStmt(pstate, parseTree);
 
+    __PG_DEBUGINFO_OUTPUT__("parse analyze: %s", format_node_dump(nodeToString(query)));
+
     if (post_parse_analyze_hook)
         (*post_parse_analyze_hook) (pstate, query);
 
