@@ -25,7 +25,7 @@ make install
 ```
 
 ### 部署
-1. Opentenbase集群部署，集群规划如下：
+
 | 节点名称 | IP | 数据目录 |
 | -- | -- | -- |
 | GTM master | 192.168.56.106 | /home/opentenbase/data/gtm |
@@ -37,7 +37,8 @@ make install
 | DN2 master | 192.168.56.104 | /home/opentenbase/data/dn002 |
 | DN2 slave | 192.168.56.106 | /home/opentenbase/data/dn002 |
 
-操作如下：
+集群节点规划如上所示，部署操作如下：
+
 ```
 PGXC deploy all
 Deploying Postgres-XL components to all the target servers.
