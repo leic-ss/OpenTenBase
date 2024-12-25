@@ -116,7 +116,7 @@ Datum pg_debuginfo_status(PG_FUNCTION_ARGS)
         realpath(pg_debuginfo_logfile_name(), resolved_path);
 
         char buff[5120] = {0};
-        snprintf(buff, sizeof(buff), "pg debuginfo is enabled! host[%s] logfile[%s]", local_ip(), resolved_path);
+        snprintf(buff, sizeof(buff), "pg debuginfo is enabled! host[%s] file[%s]", local_ip(), resolved_path);
 
         t = text_internal(buff);
         PG_RETURN_TEXT_P(t);
