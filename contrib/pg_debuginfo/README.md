@@ -156,17 +156,6 @@ se_query()]
  <> :limitCount <> :rowMarks <> :setOperations <> :constraintDeps <>
  :stmt_location 0 :stmt_len 61}
          [analyze.c:164, parse_analyze()]
- 2024-12-25 02:01:53.912580 [22981] -- parse_analyze: {QUERY :commandType 5 :querySource 0 :canSetTag true :utilityStmt {CREATESTMT
- :relation {RANGEVAR :schemaname <> :relname foo :inh true :relpersistence p
- :alias <> :location 13 :intervalparent false :partitionvalue <> :pubname <>}
- :tableElts ({COLUMNDEF :colname id :typeName {TYPENAME :names ("pg_catalog"
- "int8") :typeOid 0 :setof false :pct_type false :typmods <> :typemod -1
- :arrayBounds <> :location 20} :inhcount 0 :is_local true :is_not_null false
- :is_from_type false :is_from_parent false :storage <> :raw_default <>
- :cooked_default <> :identity <> :collClause <> :collOid 0 :constraints <>
- :fdwoptions <> :location 17} {COLUMNDEF :colname str :typeName {TYPENAME
- :names ("text") :typeOid 0 :setof false :pct_type false :typmods <> :typemod
- -1 :arrayBounds <> :location 32} :inhcount 0 :is_local true :is_not_null false
  --More--
  ... ...
  ... ...
