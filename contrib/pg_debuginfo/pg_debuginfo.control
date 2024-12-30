@@ -1,5 +1,5 @@
 # pg_debuginfo extension
-comment = 'PostgreSQL test generator'
+comment = 'PostgreSQL pg debuginfo'
 default_version = '1.0'
 module_pathname = '$libdir/pg_debuginfo'
 relocatable = true
